@@ -4,9 +4,18 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 
 dotenv.config();
-connectDB();
 
 const app = express();
+
+// Ensure DB is connected on every request (required for Vercel serverless)
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Manual CORS — must be first, before any routes
 app.use((req, res, next) => {

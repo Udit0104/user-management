@@ -9,17 +9,22 @@ connectDB();
 
 const app = express();
 
+const allowedOrigins = (process.env.CLIENT_URL || '').split(',').map(s => s.trim());
+
 app.use(cors({
   origin: (origin, callback) => {
-    const allowed = (process.env.CLIENT_URL || '').split(',').map(s => s.trim());
-    if (!origin || allowed.includes(origin) || allowed.includes('*')) {
+    if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error(`CORS blocked: ${origin}`));
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+app.options('*', cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
